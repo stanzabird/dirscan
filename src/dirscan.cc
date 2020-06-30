@@ -10,6 +10,9 @@
 
 using namespace std::filesystem;
 
+// -q (quiet mode) sets this to 'false'
+bool use_stdout = true;
+
 struct dirscan_info {
   using filesize_t = std::uintmax_t;
   struct dir { std::string name; };
@@ -25,48 +28,84 @@ struct dirscan_info {
   int dirscan(const std::string& dirname);
 };
 
-// -q (quiet mode) sets this to 'false'
-bool use_stdout = true;
-
 int
 dirscan_info::dirscan(const std::string& dirname)
 {  
   std::uintmax_t n_dir{0}, n_file{0}, sum_size{0};
   
   try {    
-    for (recursive_directory_iterator i
-	{
-	 dirname,
-	 directory_options::skip_permission_denied
-	}, end{}; i != end;)
+    recursive_directory_iterator i{dirname,directory_options::skip_permission_denied}, end{};
+    while (i != end) 
       {
-	std::uintmax_t size = 0;
-	std::string name = i->path().u8string();
+        bool has_except; // use 'ex_caught' to see if we had an exception
 
-	if (i->is_directory()) {
-	  this->dirs.push_back({name});
-	  ++n_dir;
+	std::uintmax_t size = 0;
+	std::string name;
+	path p;
+
+	// try: p = i->path();
+	has_except = false;
+	try { p = i->path(); }
+	catch (filesystem_error ex) {
+	  has_except = true;
 	}
-	else if (i->is_regular_file()) {
-	  size = i->file_size();
-	  sum_size += size;
-	  this->files.push_back({name,size});
-	  ++n_file;
+	if (has_except == false) {
+	  // try: name = p.u8string();
+	  has_except = false;
+	  try { name = p.u8string(); }
+	  catch (filesystem_error ex) {
+	    has_except = true;
+	  }
+	  catch (std::exception ex) {
+	    has_except = true;
+	  }
+	  if (has_except == false) {
+	    // It can happen that asking meta information of the found directory entry
+	    // throws, at least under windows. Let's discard such entries.
+	    bool is_dir;
+
+	    // try: is_dir = i->is_directory();
+	    has_except = false;
+	    try { is_dir = i->is_directory(); }
+	    catch (filesystem_error ex) {
+	      has_except = true;
+	    }
+	    if (has_except == false) {
+	      if (is_dir) {
+		this->dirs.push_back({ name });
+		++n_dir;
+	      }
+	      else if (i->is_regular_file()) {
+		// try: size = i->file_size();
+		has_except = false;
+		try { size = i->file_size(); }
+		catch (filesystem_error ex) {
+		  has_except = true;
+		}
+		if (has_except == false) {
+		  sum_size += size;
+		  this->files.push_back({ name,size });
+		  ++n_file;
+		}
+	      }
+
+	      if (size > 0 && use_stdout)
+		std::cout
+		<< " "
+		<< n_dir << " dirs, "
+		<< n_file << " files, "
+		<< sum_size << " bytes."
+		<< "\r" << std::flush;
+	    }
+	  }
 	}
-      
-	if (size > 0 && use_stdout)
-	  std::cout
-	    << " "
-	    << n_dir << " dirs, "
-	    << n_file << " files, "
-	    << sum_size << " bytes."
-	    << "\r" << std::flush;
+
 	
 	// increment to next entry
 	try { ++i; }
 	catch (filesystem_error ex) {
 	  std::cout
-	    << "\n\n" << ex.what() << std::endl;
+	    << "\n\niterator_increment: " << ex.what() << std::endl;
 	  return 1;
 	}
       }
@@ -82,7 +121,7 @@ dirscan_info::dirscan(const std::string& dirname)
       << this->sum_size << " bytes. " << std::endl;
   }
   catch (filesystem_error ex) {
-    std::cout << ex.what() << std::endl;
+    std::cout << "\n\n dirscan() generic: " << ex.what() << std::endl;
     return 1;
   }
 
