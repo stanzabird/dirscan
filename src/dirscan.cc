@@ -20,22 +20,23 @@ struct dirscan_info {
 
   // number of dirs, files and sum of filesizes
   filesize_t n_dir, n_file, sum_size;
+
+  // the actual work...
+  int dirscan(const std::string& dirname);
 };
 
 // -q (quiet mode) sets this to 'false'
 bool use_stdout = true;
 
 int
-dirscan(const char* arg)
+dirscan_info::dirscan(const std::string& dirname)
 {  
-  dirscan_info dsi;
-  
   std::uintmax_t n_dir{0}, n_file{0}, sum_size{0};
   
   try {    
     for (recursive_directory_iterator i
 	{
-	 arg,
+	 dirname,
 	 directory_options::skip_permission_denied
 	}, end{}; i != end;)
       {
@@ -43,13 +44,13 @@ dirscan(const char* arg)
 	std::string name = i->path().u8string();
 
 	if (i->is_directory()) {
-	  dsi.dirs.push_back({name});
+	  this->dirs.push_back({name});
 	  ++n_dir;
 	}
 	else if (i->is_regular_file()) {
 	  size = i->file_size();
 	  sum_size += size;
-	  dsi.files.push_back({name,size});
+	  this->files.push_back({name,size});
 	  ++n_file;
 	}
       
@@ -70,15 +71,15 @@ dirscan(const char* arg)
 	}
       }
 
-    dsi.n_dir = n_dir;
-    dsi.n_file = n_file;
-    dsi.sum_size = sum_size;
+    this->n_dir = n_dir;
+    this->n_file = n_file;
+    this->sum_size = sum_size;
 
     // provide some sort of result to the user...
     std::cout
-      << dsi.n_dir << " dirs, "
-      << dsi.n_file << " files, "
-      << dsi.sum_size << " bytes. " << std::endl;
+      << this->n_dir << " dirs, "
+      << this->n_file << " files, "
+      << this->sum_size << " bytes. " << std::endl;
   }
   catch (filesystem_error ex) {
     std::cout << ex.what() << std::endl;
@@ -91,20 +92,22 @@ dirscan(const char* arg)
 int
 main(int argc, char* argv[])
 {
+  dirscan_info dsi;
+
   if (argc == 2) {
     if (strcmp(argv[1],"-q") == 0) {
       use_stdout = false;
-      return dirscan(".");
+      return dsi.dirscan(".");
     }
     else 
-      return dirscan(argv[1]);
+      return dsi.dirscan(argv[1]);
   }
   else if (argc == 3) {
     if (strcmp(argv[1],"-q") == 0) use_stdout = false;
-    return dirscan(argv[2]);
+    return dsi.dirscan(argv[2]);
   }
   else {
-    return dirscan(".");
+    return dsi.dirscan(".");
   }  
 }
 
