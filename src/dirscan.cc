@@ -16,6 +16,7 @@ struct dirscan_info {
   std::vector<dir> dirs;
   std::vector<file> files;
 
+  // number of dirs, files and sum of filesizes
   filesize_t n_dir, n_file, sum_size;
 };
 
