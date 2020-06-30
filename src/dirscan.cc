@@ -1,4 +1,4 @@
-#ifdef HAVE_CONFIG_H
+ #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
 
@@ -12,6 +12,7 @@ using namespace std::filesystem;
 
 // -q (quiet mode) sets this to 'false'
 bool use_stdout = true;
+const bool use_debug = false;
 
 struct dirscan_info {
   using filesize_t = std::uintmax_t;
@@ -43,20 +44,18 @@ dirscan_info::dirscan(const std::string& dirname)
 	std::string name;
 	path p;
 
-	// try: p = i->path();
+	// TRY: p = i->path();
 	has_except = false;
 	try { p = i->path(); }
 	catch (filesystem_error ex) {
 	  has_except = true;
 	}
 	if (has_except == false) {
-	  // try: name = p.u8string();
+	  // TRY: name = p.u8string();
 	  has_except = false;
 	  try { name = p.u8string(); }
-	  catch (filesystem_error ex) {
-	    has_except = true;
-	  }
-	  catch (std::exception ex) {
+	  catch (std::system_error ex) {
+	    // this happens in visual studio in the recycle bin.
 	    has_except = true;
 	  }
 	  if (has_except == false) {
@@ -64,7 +63,7 @@ dirscan_info::dirscan(const std::string& dirname)
 	    // throws, at least under windows. Let's discard such entries.
 	    bool is_dir;
 
-	    // try: is_dir = i->is_directory();
+	    // TRY: is_dir = i->is_directory();
 	    has_except = false;
 	    try { is_dir = i->is_directory(); }
 	    catch (filesystem_error ex) {
@@ -72,11 +71,35 @@ dirscan_info::dirscan(const std::string& dirname)
 	    }
 	    if (has_except == false) {
 	      if (is_dir) {
-		this->dirs.push_back({ name });
-		++n_dir;
+
+		// Keep in mind that under Windows 10, we have an 260 MAX_PATH character limit.
+		// There is a group policy now to remove this limit, see this article:
+		// 
+		// Microsoft removes 260 character limit for NTFS Path in new Windows 10 Insider Preview
+		// https://mspoweruser.com/ntfs-260-character-windows-10/
+		//
+
+		// BEGIN: Microsoft _MAX_PATH specific code.
+#ifdef _MAX_PATH
+		if (name.length() >= _MAX_PATH) {
+		  if (use_debug) {
+		    std::cout << "\n[debug] " << name << " (" << name.length() << " bytes)" << std::endl;
+		    std::cout << "[debug] ^^^ unable to dive into folder due to _MAX_PATH" << std::endl;
+		  }
+		  i.disable_recursion_pending();
+		}
+		else {
+#endif
+		  // GENERIC CODE: add and count the folder...
+		  this->dirs.push_back({ name });
+		  ++n_dir;
+#ifdef _MAX_PATH
+		}
+#endif
+		// END: Microsoft _MAX_PATH specific code.
 	      }
 	      else if (i->is_regular_file()) {
-		// try: size = i->file_size();
+		// TRY: size = i->file_size();
 		has_except = false;
 		try { size = i->file_size(); }
 		catch (filesystem_error ex) {
@@ -100,8 +123,9 @@ dirscan_info::dirscan(const std::string& dirname)
 	  }
 	}
 
-	
-	// increment to next entry
+
+
+	// increment to next entry.
 	try { ++i; }
 	catch (filesystem_error ex) {
 	  std::cout
@@ -121,7 +145,7 @@ dirscan_info::dirscan(const std::string& dirname)
       << this->sum_size << " bytes. " << std::endl;
   }
   catch (filesystem_error ex) {
-    std::cout << "\n\n dirscan() generic: " << ex.what() << std::endl;
+    std::cout << "\n\ndirscan() generic filesystem exception: " << ex.what() << std::endl;
     return 1;
   }
 
@@ -132,22 +156,30 @@ int
 main(int argc, char* argv[])
 {
   dirscan_info dsi;
+  std::string dirname;
 
   if (argc == 2) {
     if (strcmp(argv[1],"-q") == 0) {
       use_stdout = false;
-      return dsi.dirscan(".");
+      dirname = ".";
     }
     else 
-      return dsi.dirscan(argv[1]);
+      dirname = argv[1];
   }
   else if (argc == 3) {
     if (strcmp(argv[1],"-q") == 0) use_stdout = false;
-    return dsi.dirscan(argv[2]);
+    dirname = argv[2];
   }
   else {
-    return dsi.dirscan(".");
+    dirname = ".";
   }  
+
+  auto retval = dsi.dirscan(dirname);
+
+  if (use_debug) {
+    std::cout << "[debug] back in main(), with retval = " << retval << std::endl;
+  }
+  return retval;
 }
 
 
