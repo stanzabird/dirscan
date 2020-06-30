@@ -38,7 +38,7 @@ dirscan_info::dirscan(const std::string& dirname)
     recursive_directory_iterator i{dirname,directory_options::skip_permission_denied}, end{};
     while (i != end) 
       {
-        bool has_except; // use 'ex_caught' to see if we had an exception
+        bool has_except; // use 'has_except' to see if we had an exception
 
 	std::uintmax_t size = 0;
 	std::string name;
@@ -51,6 +51,7 @@ dirscan_info::dirscan(const std::string& dirname)
 	  has_except = true;
 	}
 	if (has_except == false) {
+
 	  // TRY: name = p.u8string();
 	  has_except = false;
 	  try { name = p.u8string(); }
@@ -72,6 +73,7 @@ dirscan_info::dirscan(const std::string& dirname)
 	    if (has_except == false) {
 	      if (is_dir) {
 
+		// TRY: auto tmp = directory_iterator(name);
 		has_except = false;
 		try { auto tmp = directory_iterator(name); }
 		catch (filesystem_error ex) {
@@ -82,33 +84,9 @@ dirscan_info::dirscan(const std::string& dirname)
 		  dirs.push_back({ name });
 		  ++n_dir;
 		}
-
-
-		// BEGIN: Microsoft _MAX_PATH specific code.
-#ifdef UNDEFINED_MAX_PATH
-		// Keep in mind that under Windows 10, we have an 260 MAX_PATH character limit.
-		// There is a group policy now to remove this limit, see this article:
-		// 
-		// Microsoft removes 260 character limit for NTFS Path in new Windows 10 Insider Preview
-		// https://mspoweruser.com/ntfs-260-character-windows-10/
-		//
-
-		if (name.length() >= _MAX_PATH) {
-		  if (use_debug) {
-		    std::cout << "\n[debug] " << name << " (" << name.length() << " bytes)" << std::endl;
-		    std::cout << "[debug] ^^^ unable to dive into folder due to _MAX_PATH" << std::endl;
-		  }
-		  i.disable_recursion_pending();
-		}
-		else {
-		  // GENERIC CODE: add and count the folder...
-		  this->dirs.push_back({ name });
-		  ++n_dir;
-		}
-#endif
-		// END: Microsoft _MAX_PATH specific code.
 	    }
 	      else if (i->is_regular_file()) {
+		
 		// TRY: size = i->file_size();
 		has_except = false;
 		try { size = i->file_size(); }
@@ -132,8 +110,6 @@ dirscan_info::dirscan(const std::string& dirname)
 	    }
 	  }
 	}
-
-
 
 	// increment to next entry.
 	try { ++i; }
