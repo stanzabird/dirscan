@@ -8,6 +8,8 @@
 #include <string>
 #include <vector>
 
+using namespace std::filesystem;
+
 struct dirscan_info {
   using filesize_t = std::uintmax_t;
   struct dir { std::string name; };
@@ -28,7 +30,6 @@ dirscan(const char* arg)
 {  
   dirscan_info dsi;
   
-  using namespace std::filesystem;
   std::uintmax_t n_dir{0}, n_file{0}, sum_size{0};
   
   try {    

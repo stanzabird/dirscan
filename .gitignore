@@ -15,3 +15,5 @@ missing
 stamp-h1
 src/dirscan
 src/dirscan-dirscan.o
+vs/.vs
+vs/x64
