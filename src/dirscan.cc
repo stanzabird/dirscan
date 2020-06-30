@@ -176,7 +176,7 @@ main(int argc, char* argv[])
 
   auto retval = dsi.dirscan(dirname);
 
-  if (use_debug) {
+  if (retval != 0 && use_debug) {
     std::cout << "[debug] back in main(), with retval = " << retval << std::endl;
   }
   return retval;
