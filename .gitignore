@@ -17,3 +17,5 @@ src/dirscan
 src/dirscan-dirscan.o
 vs/.vs
 vs/x64
+vs/Release
+vs/Debug

@@ -1,0 +1,1 @@
+MSBuild dirscan.sln /target:Rebuild /property:Configuration=Release /property:Platform=x64
