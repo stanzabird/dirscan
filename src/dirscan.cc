@@ -12,7 +12,7 @@ using namespace std::filesystem;
 
 // -q (quiet mode) sets this to 'false'
 bool use_stdout = true;
-const bool use_debug = false;
+const bool use_debug = true;
 
 struct dirscan_info {
   using filesize_t = std::uintmax_t;
@@ -23,7 +23,7 @@ struct dirscan_info {
   std::vector<file> files;
 
   // number of dirs, files and sum of filesizes
-  filesize_t n_dir, n_file, sum_size;
+  filesize_t n_dir{ 0 }, n_file{ 0 }, sum_size{ 0 };
 
   // the actual work...
   int dirscan(const std::string& dirname);
@@ -72,6 +72,20 @@ dirscan_info::dirscan(const std::string& dirname)
 	    if (has_except == false) {
 	      if (is_dir) {
 
+		has_except = false;
+		try { auto tmp = directory_iterator(name); }
+		catch (filesystem_error ex) {
+		  has_except = true;
+		  i.disable_recursion_pending();
+		}
+		if (has_except == false) {
+		  dirs.push_back({ name });
+		  ++n_dir;
+		}
+
+
+		// BEGIN: Microsoft _MAX_PATH specific code.
+#ifdef UNDEFINED_MAX_PATH
 		// Keep in mind that under Windows 10, we have an 260 MAX_PATH character limit.
 		// There is a group policy now to remove this limit, see this article:
 		// 
@@ -79,8 +93,6 @@ dirscan_info::dirscan(const std::string& dirname)
 		// https://mspoweruser.com/ntfs-260-character-windows-10/
 		//
 
-		// BEGIN: Microsoft _MAX_PATH specific code.
-#ifdef _MAX_PATH
 		if (name.length() >= _MAX_PATH) {
 		  if (use_debug) {
 		    std::cout << "\n[debug] " << name << " (" << name.length() << " bytes)" << std::endl;
@@ -89,15 +101,13 @@ dirscan_info::dirscan(const std::string& dirname)
 		  i.disable_recursion_pending();
 		}
 		else {
-#endif
 		  // GENERIC CODE: add and count the folder...
 		  this->dirs.push_back({ name });
 		  ++n_dir;
-#ifdef _MAX_PATH
 		}
 #endif
 		// END: Microsoft _MAX_PATH specific code.
-	      }
+	    }
 	      else if (i->is_regular_file()) {
 		// TRY: size = i->file_size();
 		has_except = false;
