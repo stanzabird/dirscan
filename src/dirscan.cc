@@ -67,10 +67,6 @@ dirscan(const char* arg)
 	    << "\n\n" << ex.what() << std::endl;
 	  return 1;
 	}
-	
-	// can't do this outside the for loop..
-	if (i == end && use_stdout)
-	  std::cout << std::endl;
       }
 
     dsi.n_dir = n_dir;
@@ -78,11 +74,10 @@ dirscan(const char* arg)
     dsi.sum_size = sum_size;
 
     // provide some sort of result to the user...
-    if (use_stdout == false)
-      std::cout
-	<< dsi.n_dir << " dirs, "
-	<< dsi.n_file << " files, "
-	<< dsi.sum_size << " bytes." << std::endl;
+    std::cout
+      << dsi.n_dir << " dirs, "
+      << dsi.n_file << " files, "
+      << dsi.sum_size << " bytes. " << std::endl;
   }
   catch (filesystem_error ex) {
     std::cout << ex.what() << std::endl;
