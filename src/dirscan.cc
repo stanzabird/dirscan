@@ -11,8 +11,9 @@
 using namespace std::filesystem;
 
 // -q (quiet mode) sets this to 'false'
-bool use_stdout = true;
 const bool use_debug = true;
+bool use_stdout = true;
+bool use_multiple = false;
 
 struct dirscan_info {
   using filesize_t = std::uintmax_t;
@@ -125,6 +126,9 @@ dirscan_info::dirscan(const std::string& dirname)
     this->sum_size = sum_size;
 
     // provide some sort of result to the user...
+    if (use_multiple)
+      std::cout
+	<< dirname << ": ";
     std::cout
       << this->n_dir << " dirs, "
       << this->n_file << " files, "
@@ -145,16 +149,24 @@ main(int argc, char* argv[])
   std::string dirname;
 
   if (argc == 2) {
-    if (strcmp(argv[1],"-q") == 0) {
+    if (strcmp(argv[1],"-q") == 0) { 
       use_stdout = false;
       dirname = ".";
     }
-    else 
+    else {
       dirname = argv[1];
+    }
   }
   else if (argc == 3) {
     if (strcmp(argv[1],"-q") == 0) use_stdout = false;
     dirname = argv[2];
+  }
+  else if (argc > 3) {
+    use_multiple = true;
+    for (auto i = 2; i < argc; i++) {
+      auto retval = dsi.dirscan(argv[i]);
+      if (retval != 0) return retval;
+    }
   }
   else {
     dirname = ".";
@@ -162,10 +174,5 @@ main(int argc, char* argv[])
 
   auto retval = dsi.dirscan(dirname);
 
-  if (retval != 0 && use_debug) {
-    std::cout << "[debug] back in main(), with retval = " << retval << std::endl;
-  }
   return retval;
 }
-
-
