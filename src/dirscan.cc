@@ -8,12 +8,13 @@
 #include <string>
 #include <vector>
 
+#include <getopt.h>
+
 using namespace std::filesystem;
 
-// -q (quiet mode) sets this to 'false'
-const bool use_debug = true;
+// available commandline options
+bool use_debug = false;
 bool use_stdout = true;
-bool use_multiple = false;
 
 struct dirscan_info {
   using filesize_t = std::uintmax_t;
@@ -27,11 +28,10 @@ struct dirscan_info {
   filesize_t n_dir{ 0 }, n_file{ 0 }, sum_size{ 0 };
 
   // the actual work...
-  int dirscan(const std::string& dirname);
+  int dirscan(const std::string& dirname, bool use_multiple);
 };
 
-int
-dirscan_info::dirscan(const std::string& dirname)
+int dirscan_info::dirscan(const std::string& dirname, bool use_multiple)
 {  
   std::uintmax_t n_dir{0}, n_file{0}, sum_size{0};
   
@@ -142,37 +142,51 @@ dirscan_info::dirscan(const std::string& dirname)
   return 0;
 }
 
-int
-main(int argc, char* argv[])
-{
-  dirscan_info dsi;
-  std::string dirname;
+int main(int argc, char* argv[]) {
 
-  if (argc == 2) {
-    if (strcmp(argv[1],"-q") == 0) { 
+  // We're using getopt_long(), a usage example is here:
+  // https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Option-Example.html
+
+  for (;;) {
+    static struct option long_options[] = {
+      {"debug",no_argument,0,'d'},
+      {"quiet",no_argument,0,'q'},
+      {0,0,0,0}
+    };
+
+    int option_index = 0;
+    int c = getopt_long(argc, argv, "dq", long_options, &option_index);
+
+    if (c == -1) break; // Detect the end of the options.
+
+    switch (c) 
+    {
+    case 'd':
+      use_debug = true;
+      break;
+    case 'q':
       use_stdout = false;
-      dirname = ".";
-    }
-    else {
-      dirname = argv[1];
+      break;
+
+    case '?':
+      // getopt_long() already printed an error message;
+      return 1;
+    default:
+      abort();
     }
   }
-  else if (argc == 3) {
-    if (strcmp(argv[1],"-q") == 0) use_stdout = false;
-    dirname = argv[2];
-  }
-  else if (argc > 3) {
-    use_multiple = true;
-    for (auto i = 2; i < argc; i++) {
-      auto retval = dsi.dirscan(argv[i]);
+
+  dirscan_info dsi;
+  
+  if (optind < argc) {
+    while (optind < argc) {
+      auto retval = dsi.dirscan(argv[optind], true);
       if (retval != 0) return retval;
+      optind++;
     }
   }
-  else {
-    dirname = ".";
-  }  
+  else
+    return dsi.dirscan(".", false);
 
-  auto retval = dsi.dirscan(dirname);
-
-  return retval;
+  return 0;
 }

@@ -1,3 +1,5 @@
+#pragma warning (disable : 6011 4244 4267)
+
 /*
  * Copyright (c) 1987, 1993, 1994, 1996
  *	The Regents of the University of California.  All rights reserved.
@@ -163,7 +165,7 @@ int
 getopt_long(nargc, nargv, options, long_options, index)
 	int nargc;
 	char ** nargv;
-	char * options;
+	const char * options;
 	struct option * long_options;
 	int * index;
 {

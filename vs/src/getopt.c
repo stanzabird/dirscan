@@ -1,3 +1,5 @@
+#pragma warning (disable : 6011)
+
 /*	$NetBSD: getopt.c,v 1.16 1999/12/02 13:15:56 kleink Exp $	*/
 
 /*
