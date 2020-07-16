@@ -24,7 +24,7 @@ int dirscan_info::dirscan(const std::string& dirname)
 
 	  // TRY: name = p.u8string();
 	  has_except = false;
-	  try { name = p.u8string(); }
+	  try { name = p.c_str(); }
 	  catch (std::system_error ex) {
 	    // this happens in visual studio in the recycle bin.
 	    has_except = true;

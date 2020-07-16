@@ -44,8 +44,9 @@ struct dirscan_info {
   }
   void list_data() {
     for (auto i : files) {
-      if (use_list_details)
-	std::cout << i.name << "\n";
+      if (use_list_details) {
+	std::cout << " " << i.size << " " << i.name << "\n";
+      }
       else
 	std::cout << i.name << "\n";
     }
