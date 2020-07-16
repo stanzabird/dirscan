@@ -1,4 +1,5 @@
 dirscan-*.tar.gz
+*.o
 .deps
 Makefile
 Makefile.in
