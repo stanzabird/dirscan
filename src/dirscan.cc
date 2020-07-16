@@ -85,7 +85,7 @@ int dirscan_info::dirscan(const std::string& dirname, bool use_multiple)
 		  dirs.push_back({ name });
 		  ++n_dir;
 		}
-	    }
+	      }
 	      else if (i->is_regular_file()) {
 		
 		// TRY: size = i->file_size();
@@ -103,11 +103,11 @@ int dirscan_info::dirscan(const std::string& dirname, bool use_multiple)
 
 	      if (size > 0 && use_stdout)
 		std::cout
-		<< " "
-		<< n_dir << " dirs, "
-		<< n_file << " files, "
-		<< sum_size << " bytes."
-		<< "\r" << std::flush;
+		  << " "
+		  << n_dir << " dirs, "
+		  << n_file << " files, "
+		  << sum_size << " bytes."
+		  << "\r" << std::flush;
 	    }
 	  }
 	}
@@ -148,11 +148,12 @@ int main(int argc, char* argv[]) {
   // https://www.gnu.org/software/libc/manual/html_node/Getopt-Long-Option-Example.html
 
   for (;;) {
-    static struct option long_options[] = {
-      {"debug",no_argument,0,'d'},
-      {"quiet",no_argument,0,'q'},
-      {0,0,0,0}
-    };
+    static struct option long_options[] =
+      {
+       {"debug",no_argument,0,'d'},
+       {"quiet",no_argument,0,'q'},
+       {0,0,0,0}
+      };
 
     int option_index = 0;
     int c = getopt_long(argc, argv, "dq", long_options, &option_index);
@@ -160,20 +161,20 @@ int main(int argc, char* argv[]) {
     if (c == -1) break; // Detect the end of the options.
 
     switch (c) 
-    {
-    case 'd':
-      use_debug = true;
-      break;
-    case 'q':
-      use_stdout = false;
-      break;
+      {
+      case 'd':
+	use_debug = true;
+	break;
+      case 'q':
+	use_stdout = false;
+	break;
 
-    case '?':
-      // getopt_long() already printed an error message;
-      return 1;
-    default:
-      abort();
-    }
+      case '?':
+	// getopt_long() already printed an error message;
+	return 1;
+      default:
+	abort();
+      }
   }
 
   dirscan_info dsi;
