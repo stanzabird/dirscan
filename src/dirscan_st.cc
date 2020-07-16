@@ -1,6 +1,6 @@
 #include "dirscan.h"
 
-int dirscan_info::dirscan(const std::string& dirname, bool use_multiple)
+int dirscan_info::dirscan(const std::string& dirname)
 {  
   std::uintmax_t n_dir{0}, n_file{0}, sum_size{0};
   
@@ -56,16 +56,20 @@ int dirscan_info::dirscan(const std::string& dirname, bool use_multiple)
 		}
 	      }
 	      else if (i->is_regular_file()) {
+		fs::file_time_type timestamp;
 		
 		// TRY: size = i->file_size();
 		has_except = false;
-		try { size = i->file_size(); }
+		try {
+		  size = i->file_size();
+		  timestamp = fs::last_write_time(p);
+		}
 		catch (fs::filesystem_error ex) {
 		  has_except = true;
 		}
 		if (has_except == false) {
 		  sum_size += size;
-		  this->files.push_back({ name,size });
+		  this->files.push_back({ name,size, timestamp });
 		  ++n_file;
 		}
 	      }
@@ -93,15 +97,6 @@ int dirscan_info::dirscan(const std::string& dirname, bool use_multiple)
     this->n_dir = n_dir;
     this->n_file = n_file;
     this->sum_size = sum_size;
-
-    // provide some sort of result to the user...
-    if (use_multiple)
-      std::cout
-	<< dirname << ": ";
-    std::cout
-      << this->n_dir << " dirs, "
-      << this->n_file << " files, "
-      << this->sum_size << " bytes. " << std::endl;
   }
   catch (fs::filesystem_error ex) {
     std::cout << "\n\ndirscan() generic filesystem exception: " << ex.what() << std::endl;
