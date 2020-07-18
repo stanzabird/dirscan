@@ -3,7 +3,7 @@
 // available commandline options
 bool use_debug = false;
 bool use_stdout = true;
-bool use_mt = false;
+bool use_st = false;
 bool use_list = false;
 bool use_list_details = false;
 
@@ -18,14 +18,14 @@ int main(int argc, char* argv[]) {
        {"help",no_argument,0,'h'},
        {"debug",no_argument,0,'d'},
        {"quiet",no_argument,0,'q'},
-       {"mt",no_argument,0,'m'},
+       {"st",no_argument,0,'s'},
        {"list",no_argument,0,'l'},
        {"list-details",no_argument,0,'L'},
        {0,0,0,0}
       };
 
     int option_index = 0;
-    int c = getopt_long(argc, argv, "hdqmlL", long_options, &option_index);
+    int c = getopt_long(argc, argv, "hdqslL", long_options, &option_index);
 
     if (c == -1) break; // Detect the end of the options.
 
@@ -37,7 +37,7 @@ int main(int argc, char* argv[]) {
 	  << "  -h, --help          This help\n"
 	  << "  -d, --debug         Print debugging info\n"
 	  << "  -q, --quiet         Don't print progress (faster)\n"
-	  << "  -m, --mt            Use multithreading (faster)\n"
+	  << "  -s, --st            Don't use multithreading (slower)\n"
 	  << "  -l, --list          List all found files to stdout.\n"
 	  << "  -L, --list-details  List found files with size and last write time\n"
 	  ;
@@ -48,8 +48,8 @@ int main(int argc, char* argv[]) {
       case 'q':
 	use_stdout = false;
 	break;
-      case 'm':
-	use_mt = true;
+      case 's':
+	use_st = true;
 	break;
       case 'l':
 	use_list = true;
@@ -74,7 +74,7 @@ int main(int argc, char* argv[]) {
   
   if (optind < argc) {
     while (optind < argc) {
-      auto retval = use_mt ? dsi.dirscan_mt(argv[optind]) : dsi.dirscan(argv[optind]);
+      auto retval = !use_st ? dsi.dirscan_mt(argv[optind]) : dsi.dirscan(argv[optind]);
       if (retval != 0) return retval;
       if (use_list)
 	dsi.list_data();
@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
     }
   }
   else {
-    auto retval = use_mt ? dsi.dirscan_mt(".") : dsi.dirscan(".");
+    auto retval = !use_st ? dsi.dirscan_mt(".") : dsi.dirscan(".");
     if (retval != 0) return retval;
     if (use_list)
       dsi.list_data();

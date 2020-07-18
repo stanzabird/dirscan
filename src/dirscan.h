@@ -16,7 +16,7 @@ namespace fs = std::filesystem;
 // available commandline options
 extern bool use_debug;
 extern bool use_stdout;
-extern bool use_mt;
+extern bool use_st;
 extern bool use_list;
 extern bool use_list_details;
 
