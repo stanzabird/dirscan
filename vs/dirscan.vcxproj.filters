@@ -15,18 +15,27 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\dirscan.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\getopt.c">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\getopt_long.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\dirscan_mt.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\dirscan_st.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\src\main.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\getopt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\src\dirscan.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
