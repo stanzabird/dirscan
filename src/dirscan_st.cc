@@ -1,6 +1,6 @@
 #include "dirscan.h"
 
-int dirscan_info::dirscan(const std::string& dirname)
+int dirscan_info::dirscan_st(const std::string& dirname)
 {  
   std::uintmax_t n_dir{0}, n_file{0}, sum_size{0};
   
@@ -24,7 +24,7 @@ int dirscan_info::dirscan(const std::string& dirname)
 
 	  // TRY: name = p.u8string();
 	  has_except = false;
-	  try { name = p.c_str(); }
+	  try { name = p.generic_string(); }
 	  catch (std::system_error ex) {
 	    // this happens in visual studio in the recycle bin.
 	    has_except = true;

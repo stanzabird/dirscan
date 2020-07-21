@@ -1,6 +1,8 @@
+*~
 dirscan-*.tar.gz
 *.o
 .deps
+config.h.in~
 Makefile
 Makefile.in
 aclocal.m4

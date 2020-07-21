@@ -19,11 +19,14 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\src\dirscan.cc" />
+    <ClCompile Include="..\src\dirscan_mt.cc" />
+    <ClCompile Include="..\src\dirscan_st.cc" />
+    <ClCompile Include="..\src\main.cc" />
     <ClCompile Include="src\getopt.c" />
     <ClCompile Include="src\getopt_long.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\src\dirscan.h" />
     <ClInclude Include="src\getopt.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
