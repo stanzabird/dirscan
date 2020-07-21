@@ -55,4 +55,5 @@ struct dirscan_info {
   // the actual work...
   int dirscan(const std::string& dirname);
   int dirscan_mt(const std::string& dirname);
+  int dirscan_windirstat(const std::string& dirname);
 };
