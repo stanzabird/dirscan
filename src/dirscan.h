@@ -17,8 +17,9 @@ namespace fs = std::filesystem;
 extern bool use_debug;
 extern bool use_stdout;
 extern bool use_st;
+extern bool use_mt;
+extern bool use_windirstat;
 extern bool use_list;
-extern bool use_list_details;
 
 struct dirscan_info {
   using filesize_t = std::uintmax_t;
@@ -44,15 +45,12 @@ struct dirscan_info {
   }
   void list_data() {
     for (auto i : files) {
-      if (use_list_details) {
-	std::cout << " " << i.size << " " << i.name << "\n";
-      }
-      else
-	std::cout << i.name << "\n";
+      std::cout << i.name << "\n";
     }
   }
 
   // the actual work...
-  int dirscan(const std::string& dirname);
+  int dirscan_st(const std::string& dirname);
+  int dirscan_windirstat(const std::string& dirname);
   int dirscan_mt(const std::string& dirname);
 };

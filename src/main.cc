@@ -3,9 +3,10 @@
 // available commandline options
 bool use_debug = false;
 bool use_stdout = true;
-bool use_st = false;
+bool use_st = true;
+bool use_mt = false;
+bool use_windirstat = false;
 bool use_list = false;
-bool use_list_details = false;
 
 int main(int argc, char* argv[]) {
 
@@ -18,14 +19,14 @@ int main(int argc, char* argv[]) {
        {"help",no_argument,0,'h'},
        {"debug",no_argument,0,'d'},
        {"quiet",no_argument,0,'q'},
-       {"st",no_argument,0,'s'},
+       {"mt",no_argument,0,'m'},
+       {"windirstat",no_argument,0,'w'},
        {"list",no_argument,0,'l'},
-       {"list-details",no_argument,0,'L'},
        {0,0,0,0}
       };
 
     int option_index = 0;
-    int c = getopt_long(argc, argv, "hdqslL", long_options, &option_index);
+    int c = getopt_long(argc, argv, "hdqmwl", long_options, &option_index);
 
     if (c == -1) break; // Detect the end of the options.
 
@@ -37,9 +38,8 @@ int main(int argc, char* argv[]) {
 	  << "  -h, --help          This help\n"
 	  << "  -d, --debug         Print debugging info\n"
 	  << "  -q, --quiet         Don't print progress (faster)\n"
-	  << "  -s, --st            Don't use multithreading (slower)\n"
-	  << "  -l, --list          List all found files to stdout.\n"
-	  << "  -L, --list-details  List found files with size and last write time\n"
+	  << "  -m, --mt            Use multithreading\n"
+	  << "  -l, --list          List all found files to stdout\n"
 	  ;
 	return 0;
       case 'd':
@@ -48,15 +48,14 @@ int main(int argc, char* argv[]) {
       case 'q':
 	use_stdout = false;
 	break;
-      case 's':
-	use_st = true;
+      case 'm':
+	use_st = use_windirstat = false; use_mt = true;
+	break;
+      case 'w':
+	use_st = use_mt = false; use_windirstat = true;
 	break;
       case 'l':
 	use_list = true;
-	break;
-      case 'L':
-	use_list = true;
-	use_list_details = true;
 	break;
 
       case '?':
@@ -74,7 +73,12 @@ int main(int argc, char* argv[]) {
   
   if (optind < argc) {
     while (optind < argc) {
-      auto retval = !use_st ? dsi.dirscan_mt(argv[optind]) : dsi.dirscan(argv[optind]);
+      
+      int retval = 1;
+      if (use_st) retval = dsi.dirscan_st(argv[optind]);
+      else if (use_windirstat) retval = dsi.dirscan_windirstat(argv[optind]);
+      else if (use_mt) retval = dsi.dirscan_mt(argv[optind]);
+      
       if (retval != 0) return retval;
       if (use_list)
 	dsi.list_data();
@@ -84,7 +88,11 @@ int main(int argc, char* argv[]) {
     }
   }
   else {
-    auto retval = !use_st ? dsi.dirscan_mt(".") : dsi.dirscan(".");
+    int retval = 1;
+    if (use_st) retval = dsi.dirscan_st(".");
+    else if (use_windirstat) retval = dsi.dirscan_windirstat(".");
+    else if (use_mt) retval = dsi.dirscan_mt(".");
+    
     if (retval != 0) return retval;
     if (use_list)
       dsi.list_data();

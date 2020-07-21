@@ -1,6 +1,6 @@
 #include "dirscan.h"
 
-int dirscan_info::dirscan(const std::string& dirname)
+int dirscan_info::dirscan_st(const std::string& dirname)
 {  
   std::uintmax_t n_dir{0}, n_file{0}, sum_size{0};
   
