@@ -7,6 +7,8 @@ bool use_st = true;
 bool use_mt = false;
 bool use_windirstat = false;
 bool use_list = false;
+bool use_timing = false;
+
 
 int main(int argc, char* argv[]) {
 
@@ -22,11 +24,12 @@ int main(int argc, char* argv[]) {
        {"mt",no_argument,0,'m'},
        {"windirstat",no_argument,0,'w'},
        {"list",no_argument,0,'l'},
+       {"timer",no_argument,0,'t'},
        {0,0,0,0}
       };
 
     int option_index = 0;
-    int c = getopt_long(argc, argv, "hdqmwl", long_options, &option_index);
+    int c = getopt_long(argc, argv, "hdqmwlt", long_options, &option_index);
 
     if (c == -1) break; // Detect the end of the options.
 
@@ -39,7 +42,9 @@ int main(int argc, char* argv[]) {
 	  << "  -d, --debug         Print debugging info\n"
 	  << "  -q, --quiet         Don't print progress (faster)\n"
 	  << "  -m, --mt            Use multithreading\n"
+	  << "  -w, --windirstat    Use WinDirStat multithreading\n"
 	  << "  -l, --list          List all found files to stdout\n"
+	  << "  -t, --timer         Time the program running time"
 	  ;
 	return 0;
       case 'd':
@@ -56,6 +61,9 @@ int main(int argc, char* argv[]) {
 	break;
       case 'l':
 	use_list = true;
+	break;
+      case 't':
+	use_timing = true;
 	break;
 
       case '?':

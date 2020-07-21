@@ -20,6 +20,7 @@ extern bool use_st;
 extern bool use_mt;
 extern bool use_windirstat;
 extern bool use_list;
+extern bool use_timing;
 
 struct dirscan_info {
   using filesize_t = std::uintmax_t;

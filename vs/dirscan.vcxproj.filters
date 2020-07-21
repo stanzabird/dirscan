@@ -30,6 +30,9 @@
     <ClCompile Include="..\src\main.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\dirscan_windirstat.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\getopt.h">

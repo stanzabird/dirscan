@@ -21,6 +21,7 @@
   <ItemGroup>
     <ClCompile Include="..\src\dirscan_mt.cc" />
     <ClCompile Include="..\src\dirscan_st.cc" />
+    <ClCompile Include="..\src\dirscan_windirstat.cc" />
     <ClCompile Include="..\src\main.cc" />
     <ClCompile Include="src\getopt.c" />
     <ClCompile Include="src\getopt_long.c" />
